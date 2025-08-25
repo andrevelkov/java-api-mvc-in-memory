@@ -29,13 +29,16 @@ public class ProductRepository {
                 .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
     }
 
-    public Product updateProduct(int id) {
+    public Product updateProduct(int id, Product body) {
         Product product = productList.stream()
                                     .filter(p -> p.getId() == id)
                                     .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
 
         // UPDATE PRODUCT info and then return product wowoww
-        // product.setName();
+         product.setName(body.getName());
+         product.setCategory(body.getCategory());
+         product.setPrice(body.getPrice());
+
         return product;
     }
 

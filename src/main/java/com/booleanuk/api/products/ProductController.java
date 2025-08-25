@@ -44,9 +44,9 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable int id) {
+    public ResponseEntity<?> updateProduct(@PathVariable int id, @RequestBody Product body) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(this.repository.updateProduct(id));
+            return ResponseEntity.status(HttpStatus.CREATED).body(this.repository.updateProduct(id, body));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find product to update " + e.getMessage());
         }
