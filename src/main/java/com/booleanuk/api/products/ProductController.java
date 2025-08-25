@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/products")
@@ -26,11 +27,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllProducts() {
+    public ResponseEntity<?> getAllProducts(@RequestParam String category ) {
         try {
-            return ResponseEntity.ok(this.repository.getAllProducts());
+            return ResponseEntity.ok(this.repository.getAllProducts(category));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Could not fetch all products.. " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
 
@@ -47,22 +48,21 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@PathVariable int id, @RequestBody Product body) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(this.repository.updateProduct(id, body));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find product to update " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable int id) {
         try {
-            if (this.repository.deleteProduct(id)) {
-                return ResponseEntity.status(HttpStatus.OK).body("Product removed.");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find product to delete, " + e.getMessage());
+            this.repository.deleteProduct(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Product removed.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
-        return ResponseEntity.badRequest().body("Error");
     }
 
 }

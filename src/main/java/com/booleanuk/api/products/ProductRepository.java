@@ -13,14 +13,27 @@ public class ProductRepository {
 
     public ProductRepository() {}
 
-    public Product createProduct(Product product) {
+    public Product createProduct(Product product) throws Exception {
+        for (Product p : productList) {
+            if (p.getName().equalsIgnoreCase(product.getName())) {
+                throw new Exception("Product with provided name already exists.");
+            }
+        }
+
         product.setId(idCounter++);
         this.productList.add(product);
         return product;
     }
 
-    public List<Product> getAllProducts() {
-        return this.productList;
+    public List<Product> getAllProducts(String category) throws Exception {
+        List<Product> list = productList.stream()
+                                        .filter(product -> product.getCategory().equalsIgnoreCase(category))
+                                        .toList();
+        if (!list.isEmpty()) {
+            return list;
+        } else {
+            throw new Exception("No products of the provided category were found.");
+        }
     }
 
     public Product getSingleProduct(int id) {
@@ -34,19 +47,22 @@ public class ProductRepository {
                                     .filter(p -> p.getId() == id)
                                     .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
 
-        // UPDATE PRODUCT info and then return product wowoww
-         product.setName(body.getName());
-         product.setCategory(body.getCategory());
-         product.setPrice(body.getPrice());
+        for (Product p : productList) {
+            if (p.getName().equalsIgnoreCase(body.getName()))
+                throw new IllegalArgumentException("Product with provided name already exists.");
+        }
 
+        product.setName(body.getName());
+        product.setCategory(body.getCategory());
+        product.setPrice(body.getPrice());
         return product;
     }
 
-    public boolean deleteProduct(int id) {
+    public void deleteProduct(int id) {
         Product product = productList.stream()
                 .filter(p -> p.getId() == id)
                 .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
 
-        return productList.remove(product);
+        productList.remove(product);
     }
 }
